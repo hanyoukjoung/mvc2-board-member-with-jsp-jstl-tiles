@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+"http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+
+<sqlMap namespace="iboardfile">
+	<typeAlias alias="ifileVO" type="kr.or.ddit.vo.BoardFileVO" />
+	
+	
+	<insert id="insertIboardItem" parameterClass="ifileVO">
+		INSERT INTO IBOARD_FILE
+		VALUES(
+				IBOARD_FILE_SEQ.NEXTVAL,
+				#bo_no#,
+				#file_name#,
+				#file_save_name#,
+				#file_cont_type#,
+				#file_size#,
+				'n',
+				sysdate,
+				0
+				)
+	</insert>
+	
+	<select id="iboardItemInfoForThumb" parameterClass="Map" resultClass="ifileVO">
+		SELECT B.*
+		  FROM
+				(SELECT ROWNUM rnum, A.*
+				  FROM IBOARD_FILE A
+				 WHERE BO_NO = #bo_no#
+				 ORDER BY FILE_REG_DATE DESC) B
+		 WHERE B.RNUM = 1
+	</select>
+</sqlMap>

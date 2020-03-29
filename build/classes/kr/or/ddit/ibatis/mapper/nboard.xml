@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+"http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<!-- 공지사항 -->
+
+<sqlMap namespace="nboard">
+	<typeAlias alias="NBoardVO" type="kr.or.ddit.vo.NBoardVO"/>
+	
+	<resultMap id="freeboardResultMap" class="NBoardVO">
+		<result property="bo_no" column="bo_no"/>
+		<result property="bo_title" column="bo_title"/>
+		<result property="bo_writer" column="bo_writer"/>
+		<result property="bo_nick" column="bo_nick"/>
+		<result property="bo_pass" column="bo_pass"/>
+		<result property="bo_ip" column="bo_ip"/>
+		<result property="bo_bo_cont" column="bo_bo_cont"/>
+		<result property="bo_hit" column="bo_hit"/>
+		<result property="bo_reg_date" column="bo_reg_date"/>
+		<result property="bo_del" column="bo_del"/>
+	<result property="items" column="bo_no" select="nboardfile.nboardfileList"/>  
+	</resultMap>
+	
+	<sql id="selectAll">
+		SELECT * FROM NBOARD
+		WHERE BO_DEL ='y'
+	</sql>
+	
+	<sql id="searchCondition">
+	<dynamic prepend="AND">
+ 					<isNotEmpty property="search_keyword">
+ 						<isEqual property="search_keycode" compareValue="TOTAL" open="(" close=")">
+ 							BO_TITLE LIKE '%'||#search_keyword#||'%'
+ 						OR  BO_BO_CONT LIKE '%'||#search_keyword#||'%'
+ 						OR	BO_NICK LIKE '%'||#search_keyword#||'%'
+ 						</isEqual>
+ 					</isNotEmpty>
+ 					<isEqual property="search_keycode" compareValue="TITLE" >
+ 							BO_TITLE LIKE '%'||#search_keyword#||'%'
+ 					</isEqual>
+ 					<isEqual property="search_keycode" compareValue="CONTENT">
+ 							BO_BO_CONT LIKE '%'||#search_keyword#||'%'
+ 					</isEqual>
+ 					<isEqual property="search_keycode" compareValue="NICK">
+ 							BO_NICK LIKE '%'||#search_keyword#||'%'
+ 					</isEqual>
+ 				</dynamic>
+	</sql>
+	
+	<select id="freeboardInfo" parameterClass="map" resultMap="freeboardResultMap">
+		<include refid="selectAll"/>
+		AND BO_NO=#bo_no#
+	</select>
+	
+	<select id="freeboardList" resultClass="NBoardVO" parameterClass="map">
+		 SELECT B.*
+		FROM( SELECT ROWNUM rnum, A.*
+ 			FROM (<include refid="selectAll"/>
+ 				  <include refid="searchCondition"/>
+		    	 ) A) B
+	<![CDATA[
+ 	WHERE B.RNUM <= #startCount# 
+ 			AND B.RNUM >= #endCount# 
+    	 ]]> 
+   	 ORDER BY RNUM DESC 	  	  
+	</select>
+	
+	<insert id="insertnboard" parameterClass="NBoardVO">
+		<selectKey keyProperty="bo_no" resultClass="string">
+			SELECT NBOARD_SEQ.NEXTVAL FROM DUAL
+		</selectKey>
+		INSERT INTO NBOARD(BO_NO
+						  ,BO_TITLE
+						  ,BO_WRITER
+						  ,BO_NICK
+						  ,BO_PASS
+						  ,BO_IP
+						  ,BO_BO_CONT
+						  ,BO_REG_DATE
+						  ,BO_DEL)
+				VALUES(#bo_no#
+					  ,#bo_title#
+					  ,#bo_writer#
+					  ,#bo_nick#
+					  ,#bo_pass#
+					  ,#bo_ip#
+					  ,#bo_bo_cont#
+					  ,sysdate
+					  ,'y')
+	</insert>
+	
+	<update id="updateHit" parameterClass="map">
+		UPDATE NBOARD
+			SET BO_HIT = BO_HIT+1
+		WHERE BO_NO =#bo_no#
+	</update>
+	
+	<update id="updatenboard" parameterClass="NBoardVO">
+		UPDATE NBOARD
+			SET BO_TITLE = #bo_title#
+			   ,BO_NICK = #bo_nick#
+			   ,BO_PASS = #bo_pass#
+			   ,BO_BO_CONT = #bo_bo_cont#
+	   WHERE BO_NO = #bo_no#
+	</update>
+	
+	<update id="deletenboard" parameterClass="map">
+		UPDATE NBOARD
+			SET BO_DEL='n'
+		WHERE BO_NO = #bo_no#
+	</update>
+	
+	<select id="totalCount" parameterClass="map" resultClass="string">
+	SELECT COUNT(BO_NO)
+		FROM NBOARD
+	WHERE BO_DEL ='y'
+	<include refid="searchCondition"/>
+	</select>
+	
+	
+	
+	
+</sqlMap>

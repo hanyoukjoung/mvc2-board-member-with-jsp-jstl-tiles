@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+"http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<!-- 이미지게시판 -->
+
+<sqlMap namespace="iboard">
+	<typeAlias alias="iboardVO" type="kr.or.ddit.vo.IBoardVO"/>
+
+	<resultMap id="iboardResultMap" class="iboardVO">
+		<result property="bo_no" column="bo_no"/>
+		<result property="bo_title" column="bo_title"/>
+		<result property="bo_writer" column="bo_writer"/>
+		<result property="bo_nick" column="bo_nick"/>
+		<result property="bo_pass" column="bo_pass"/>
+		<result property="bo_ip" column="bo_ip"/>
+		<result property="bo_cont" column="bo_cont"/>
+		<result property="bo_hit" column="bo_hit"/>
+		<result property="bo_reg_date" column="bo_reg_date"/>
+		<result property="bo_del" column="bo_del"/>
+		<result property="bo_group" column="bo_group"/>
+		<result property="bo_seq" column="bo_seq"/>
+		<result property="bo_depth" column="bo_depth"/>
+<!-- 		<result property="items" column="bo_no" select="fileitem.fileitemList"/> -->
+	</resultMap>
+	
+	<sql id="selectAll">
+		SELECT X.*,
+        	   Y.FILE_SAVE_NAME 
+   		  FROM IBOARD 										X, 
+        	   IBOARD_FILE 									Y,
+        	   (SELECT BO_NO, 
+        	   		   MAX(FILE_REG_DATE) AS FILE_REG_DATE 
+        	   	  FROM IBOARD_FILE 
+        	   	 GROUP BY BO_NO) 							Z
+  		 WHERE X.BO_NO = Z.BO_NO 
+    	   AND X.BO_NO = Y.BO_NO
+    	   AND Y.FILE_REG_DATE = Z.FILE_REG_DATE
+    	   AND X.BO_DEL = 'n'
+	</sql>
+	
+	<sql id="searchCondition">
+	<dynamic prepend="AND">
+		<isNotEmpty property="search_keyword">
+			<isEqual property="search_keycode" compareValue="TOTAL" open="(" close=")">
+					BO_TITLE LIKE '%'||#search_keyword#||'%'
+				OR  BO_CONT LIKE '%'||#search_keyword#||'%'
+				OR	BO_NICK LIKE '%'||#search_keyword#||'%'
+			</isEqual>
+			<isEqual property="search_keycode" compareValue="TITLE" >
+					BO_TITLE LIKE '%'||#search_keyword#||'%'
+			</isEqual>
+			<isEqual property="search_keycode" compareValue="CONTENT">
+					BO_CONT LIKE '%'||#search_keyword#||'%'
+			</isEqual>
+			<isEqual property="search_keycode" compareValue="WRITER">
+					BO_WRITER LIKE '%'||#search_keyword#||'%'
+			</isEqual>
+			<isEqual property="search_keycode" compareValue="NICK">
+					BO_NICK LIKE '%'||#search_keyword#||'%'
+			</isEqual>
+			</isNotEmpty>
+		</dynamic>
+	</sql>
+	
+	<select id="totalcount" parameterClass="Map" resultClass="String" >
+		SELECT COUNT(*)
+		  FROM IBOARD
+		 WHERE BO_DEL = 'n'
+		 <include refid="searchCondition"/>
+	</select>
+	
+	<select id="boardList" resultClass="iboardVO" parameterClass="Map">
+	SELECT B.*
+		FROM( SELECT ROWNUM rnum, A.*
+ 			    FROM (<include refid="selectAll"/>
+ 				      <include refid="searchCondition"/>
+		    	     ) A
+		    ) B
+	<![CDATA[
+ 	WHERE B.RNUM <= #startCount# 
+ 			AND B.RNUM >= #endCount# 
+    	 ]]> 
+   	 ORDER BY B.RNUM DESC 	  	  
+	</select>
+	
+	<select id="boardInfo" parameterClass="Map" resultClass="iboardVO">
+		<include refid="selectAll"/>
+		AND X.BO_NO = #bo_no#
+	</select>
+		
+	<insert id="insertBoard" parameterClass="iboardVO">
+		<selectKey keyProperty="bo_no" resultClass="String">
+			SELECT IBOARD_SEQ.NEXTVAL
+			  FROM DUAL
+		</selectKey>
+		INSERT INTO IBOARD
+		VALUES(
+				#bo_no#,
+				#bo_title#,
+				#bo_writer#,
+				#bo_nick#,
+				#bo_pass#,
+				#bo_ip#,
+				#bo_cont#,
+				0,
+				sysdate,
+				'n'
+				)
+	</insert>
+	
+	<update id="updateBoard" parameterClass="iboardVO">
+		UPDATE IBOARD
+		   SET BO_TITLE = #bo_title#,
+		   	   BO_WRITER = #bo_writer#,
+		   	   BO_NICK = #bo_nick#,
+		   	   BO_PASS = #bo_pass#,
+		   	   BO_IP = #bo_ip#,
+		   	   BO_CONT = #bo_cont#,
+		   	   BO_REG_DATE = sysdate
+		 WHERE BO_NO = #bo_no#
+	</update>
+	
+	<update id="updateBoardForAdmin" parameterClass="iboardVO">
+		UPDATE IBOARD
+		   SET BO_TITLE = #bo_title#,
+		   	   BO_WRITER = #bo_writer#,
+		   	   BO_IP = #bo_ip#,
+		   	   BO_CONT = #bo_cont#,
+		   	   BO_REG_DATE = sysdate
+		 WHERE BO_NO = #bo_no#
+	</update>
+	
+	<update id="increaseHit" parameterClass="Map">
+		UPDATE IBOARD
+		   SET BO_HIT = BO_HIT + 1
+		 WHERE BO_NO = #bo_no#
+	</update>
+	
+	<update id="deleteBoard" parameterClass="Map">
+		UPDATE IBOARD
+		   SET BO_DEL = 'y'
+		 WHERE BO_NO = #bo_no#
+	</update>
+</sqlMap>

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<tm:TermDictionary xmlns:tm="http://exerd.com/term-model" version="1.1">
+  <term name="식별번호" physicalName="NO"/>
+  <term name="게시판" physicalName="BO"/>
+  <term name="이미지" physicalName="IMG"/>
+  <term name="파일" physicalName="FILE"/>
+  <term name="명" physicalName="NAME"/>
+  <term name="저장" physicalName="SAVE"/>
+  <term name="크기" physicalName="SIZE"/>
+  <term name="삭제" physicalName="DEL"/>
+  <term name="업로드" physicalName="REG"/>
+  <term name="일" physicalName="DATE"/>
+  <term name="다운로드" physicalName="DOWN"/>
+  <term name="조회수" physicalName="HIT"/>
+  <term name="자료실" physicalName="REF"/>
+  <term name="IP" physicalName="IP"/>
+  <term name="별명" physicalName="NICK"/>
+  <term name="비밀번호" physicalName="PASS"/>
+  <term name="내용" physicalName="CONT"/>
+  <term name="등록 일" physicalName="DATE"/>
+  <term name="그룹" physicalName="GROUP"/>
+  <term name="순번" physicalName="SEQ"/>
+  <term name="깊이" physicalName="DEPTH"/>
+  <term name="시퀀스" physicalName="SEQ"/>
+  <term name="자유" physicalName="FREE"/>
+  <term name="관리자" physicalName="ADMIN"/>
+  <term name="전화번호" physicalName="HP"/>
+  <term name="집전화번호" physicalName="HOMETEL"/>
+  <term name="사무실전화번호" physicalName="COMTEL"/>
+  <term name="휴대폰번호" physicalName="HP"/>
+  <term name="이메일" physicalName="MAIL"/>
+  <term name="공지사항" physicalName="NTC"/>
+  <term name="QA" physicalName="QA"/>
+  <term name="우편번호" physicalName="ZIPCODE"/>
+  <term name="시도" physicalName="SIDO"/>
+  <term name="구군" physicalName="GUGUN"/>
+  <term name="동" physicalName="DONG"/>
+  <term name="리" physicalName="RI"/>
+  <term name="번지" physicalName="BUNJI"/>
+  <term name="회원" physicalName="MEM"/>
+  <term name="아이디" physicalName="ID"/>
+  <term name="제목" physicalName="TITLE"/>
+  <term name="컨텐츠" physicalName="CONT"/>
+  <term name="타입" physicalName="TYPE"/>
+  <term name="등록" physicalName="REG"/>
+  <term name="주민번호1" physicalName="REGNO1"/>
+  <term name="주소1" physicalName="ADD1"/>
+  <term name="주민번호2" physicalName="REGNO2"/>
+  <term name="주소2" physicalName="ADD2"/>
+  <term name="생일" physicalName="BIR"/>
+  <term name="작성자" physicalName="WRITER"/>
+  <tag name="식별번호"/>
+</tm:TermDictionary>

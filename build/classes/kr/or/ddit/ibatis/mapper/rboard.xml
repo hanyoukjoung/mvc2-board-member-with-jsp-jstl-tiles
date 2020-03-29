@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+"http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<!-- 자료실게시판 -->
+
+<sqlMap namespace="rboard">
+	<typeAlias alias="rboardVO" type="kr.or.ddit.vo.RBoardVO"/>
+	
+	<resultMap class="rboardVO" id="rboardResultMap">
+		<result property="bo_no" column="bo_no"/>
+		<result property="bo_title" column="bo_title"/>
+		<result property="bo_nick" column="bo_nick"/>
+		<result property="bo_pass" column="bo_pass"/>
+		<result property="bo_ip" column="bo_ip"/>
+		<result property="bo_cont" column="bo_cont"/>
+		<result property="bo_hit" column="bo_hit"/>
+		<result property="bo_reg_date" column="bo_reg_date"/>
+		<result property="bo_del" column="bo_del"/>
+		<result property="bo_group" column="bo_group"/>
+		<result property="bo_seq" column="bo_seq"/>
+		<result property="bo_depth" column="bo_depth"/>
+		<result property="bo_writer" column="bo_writer"/>
+		<result property="items" column="bo_no" select="rboardfile.fileRList"/>
+	</resultMap>
+	
+	<sql id="selectAll">
+		SELECT *
+		  FROM RBOARD
+		 WHERE BO_DEL = 'n'
+	</sql>
+	
+	<sql id="searchCondition">
+		<dynamic prepend="AND">
+  			<isNotEmpty property="search_keyword">
+  				<isEqual property="search_keycode" compareValue="TOTAL" open="(" close=")">
+  					BO_TITLE LIKE '%'||#search_keyword#||'%'
+  				 OR BO_CONT LIKE '%'||#search_keyword#||'%'
+  				 OR BO_NICK LIKE '%'||#search_keyword#||'%'
+  				</isEqual>
+  				<isEqual property="search_keycode" compareValue="TITLE" >
+  					BO_TITLE LIKE '%'||#search_keyword#||'%'
+  				</isEqual>
+  				<isEqual property="search_keycode" compareValue="CONT" >
+  					BO_CONT LIKE '%'||#search_keyword#||'%'
+  				</isEqual>
+  				<isEqual property="search_keycode" compareValue="NICK" >
+  					BO_NICK LIKE '%'||#search_keyword#||'%'
+  				</isEqual>
+  			</isNotEmpty>
+  		</dynamic>
+	</sql>
+	
+	<select id="rboardList" resultClass="rboardVO" parameterClass="map">
+		SELECT B.*
+		FROM( SELECT ROWNUM rnum, A.*
+ 			FROM (<include refid="selectAll"/>
+ 				  <include refid="searchCondition"/>
+		    	  ORDER BY BO_GROUP, BO_SEQ DESC) A) B
+	<![CDATA[
+ 	WHERE B.RNUM <= #startCount# 
+ 			AND B.RNUM >= #endCount# 
+    	 ]]> 
+   	 ORDER BY B.RNUM DESC
+	</select>
+	
+	<select id="rboardInfo" parameterClass="map" resultMap="rboardResultMap">
+		<include refid="selectAll"/>
+			AND BO_NO = #bo_no#
+	</select>
+	
+	<update id="updateHIT" parameterClass="map">
+		UPDATE RBOARD
+		   SET BO_HIT = BO_HIT + 1
+		 WHERE BO_NO = #bo_no#
+	</update>
+	
+	<insert id="insertRBoard" parameterClass="rboardVO">
+		<selectKey keyProperty="bo_no" resultClass="String">
+			SELECT RBOARD_SEQ.NEXTVAL FROM DUAL
+		</selectKey>
+		INSERT INTO RBOARD(BO_NO
+						  ,BO_TITLE
+						  ,BO_WRITER
+						  ,BO_NICK
+						  ,BO_PASS
+						  ,BO_IP
+						  ,BO_CONT
+						  ,BO_REG_DATE
+						  ,BO_DEL
+						  ,BO_GROUP
+						  ,BO_SEQ
+	            		  ,BO_DEPTH
+	            		  ,BO_HIT )
+				VALUES(#bo_no#
+					  ,#bo_title#
+					  ,#bo_writer#
+					  ,#bo_nick#
+					  ,#bo_pass#
+					  ,#bo_ip#
+					  ,#bo_cont#
+					  ,sysdate
+					  ,'n'
+					  ,#bo_no#
+					  ,0
+					  ,0
+					  ,0)
+	</insert>
+	
+	<update id="updateRBoardInfo" parameterClass="rboardVO">
+		UPDATE RBOARD
+		   SET BO_TITLE = #bo_title#,
+		       BO_NICK = #bo_nick#,
+		       BO_PASS=#bo_pass#,
+		       BO_CONT=#bo_cont#
+		 WHERE BO_NO=#bo_no#  
+		  
+	</update>
+	
+	<update id="deleteRBoardInfo" parameterClass="Map" >
+		UPDATE RBOARD
+		   SET BO_DEL='y'
+		 WHERE BO_NO = #bo_no#
+	</update>
+	
+	<select id="incrementSEQ" parameterClass="rboardVO" resultClass="String">
+		SELECT MAX(BO_SEQ)+1
+		  FROM RBOARD
+		 WHERE BO_GROUP = #bo_group#  
+	</select>
+	<update id="updateSEQ" parameterClass="rboardVO">
+		UPDATE RBOARD
+		   SET BO_SEQ = BO_SEQ +1
+		 WHERE BO_GROUP=#bo_group#
+		   AND BO_SEQ > #bo_seq#
+	</update>
+	
+	<insert id="insertRBoardReply" parameterClass="rboardVO">
+		<selectKey keyProperty="bo_no">
+			SELECT RBOARD_SEQ.NEXTVAL FROM DUAL
+		</selectKey>
+		INSERT INTO RBOARD(BO_NO
+	             , BO_TITLE
+	             , BO_WRITER
+	             , BO_NICK
+	             , BO_PASS
+	             , BO_IP
+	             , BO_CONT
+	             , BO_GROUP
+	             , BO_SEQ
+	             , BO_DEPTH
+	             , BO_DEL)
+			     VALUES(#bo_no#
+					,#bo_title#
+					,#bo_writer#
+					,#bo_nick#
+					,#bo_pass#
+					,#bo_ip#
+					,#bo_cont#
+					,#bo_group#
+					,#bo_seq#
+					,#bo_depth#
+					,'n')
+	</insert>
+	
+	<select id="totalCount" parameterClass="map" resultClass="String">
+		SELECT COUNT(BO_NO)
+		  FROM RBOARD
+		 WHERE BO_DEL='n'
+		   <include refid="searchCondition"/>
+	</select>
+</sqlMap>

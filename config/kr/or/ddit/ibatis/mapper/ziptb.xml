@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+"http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<!-- 주소 -->
+
+<sqlMap namespace="zipcode">
+	<typeAlias alias="zipVO" type="kr.or.ddit.vo.ZiptbVO" />
+	
+	<select id="zipcodeList" parameterClass="map" resultClass="zipVO">
+		SELECT *
+		FROM ZIPTB
+		WHERE DONG LIKE '%'||#dong#||'%'
+	</select>
+	
+	<select id="sidoList" resultClass="String">
+		SELECT SIDO 
+		  FROM ZIPTB 
+		 GROUP BY SIDO
+	</select>
+	
+	<select id="gugunList" parameterClass="String" resultClass="String">
+		SELECT GUGUN 
+		  FROM ZIPTB 
+		 WHERE GUGUN IS NOT NULL 
+		   AND SIDO LIKE '%'||#sido#||'%' 
+		 GROUP BY GUGUN
+	</select>
+	
+</sqlMap>

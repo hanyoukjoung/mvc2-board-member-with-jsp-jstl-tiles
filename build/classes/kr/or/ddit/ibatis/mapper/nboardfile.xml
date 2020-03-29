@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+"http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<!-- 공지사항 파일 -->
+
+<sqlMap namespace="nboardfile">
+<typeAlias alias="nboardfileVO" type="kr.or.ddit.vo.BoardFileVO"/>
+	
+	<statement id="nboardfileList" resultClass="nboardfileVO">
+	     SELECT * 
+	     	FROM NBOARD_FILE
+	     WHERE BO_NO = #bo_no#
+	</statement>
+	
+	<insert id="insertNboardItem" parameterClass="nboardfileVO">
+		INSERT INTO NBOARD_FILE
+			(
+				 FILE_NO
+				,BO_NO
+				,FILE_NAME
+				,FILE_SAVE_NAME
+				,FILE_CONT_TYPE
+				,FILE_SIZE
+				,FILE_DEL
+				,FILE_REG_DATE
+				,FILE_DOWN_HIT
+			)
+	    VALUES
+	    	(
+	    		 NBOARD_FILE_SEQ.NEXTVAL
+				,#bo_no#
+				,#file_name#
+				,#file_save_name#
+				,#file_cont_type#
+				,#file_size#
+				,'y'
+				,sysdate
+				,1
+			)
+	
+	</insert>
+	
+	<select id="nboardItemInfo" parameterClass="map" resultClass="nboardfileVO">
+		SELECT * 
+			FROM NBOARD_FILE
+		WHERE FILE_NO = #fileSEQ#
+	</select>
+	
+</sqlMap>

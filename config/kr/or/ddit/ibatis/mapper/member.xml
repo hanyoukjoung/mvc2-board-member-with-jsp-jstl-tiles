@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+"http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<!-- 회원 -->
+
+<sqlMap namespace="member">
+
+	<typeAlias alias="memberVO" type="kr.or.ddit.vo.MemberVO" />
+	
+	<sql id="selectAll">
+		SELECT * 
+		  FROM MEMBER
+		 WHERE MEM_DEL ='n'
+	</sql>
+	
+	<sql id="searchCondition">
+		<dynamic prepend="AND">
+ 			<isNotEmpty property="search_keyword">
+ 				<isEqual property="search_keycode" compareValue="ALL" open="(" close=")">
+ 					MEM_ID LIKE '%'||#search_keyword#||'%'
+ 				 OR MEM_NAME LIKE '%'||#search_keyword#||'%'
+ 				</isEqual>
+ 				<isEqual property="search_keycode" compareValue="ID" >
+ 					MEM_ID LIKE '%'||#search_keyword#||'%'
+ 				</isEqual>
+ 				<isEqual property="search_keycode" compareValue="NAME" >
+ 					MEM_NAME LIKE '%'||#search_keyword#||'%'
+ 				</isEqual>
+ 			</isNotEmpty>
+ 		</dynamic>
+	</sql>
+	
+	<sql id="searchConditionForAdmin">
+		<dynamic prepend="AND">
+ 			<isNotEmpty property="search_base_keyword">
+ 				<isEqual property="search_base_keycode" compareValue="NAME">
+ 				 	MEM_NAME LIKE '%'||#search_base_keyword#||'%'
+ 				</isEqual>
+ 				<isEqual property="search_base_keycode" compareValue="ID" >
+ 					MEM_ID LIKE '%'||#search_base_keyword#||'%'
+ 				</isEqual>
+ 			</isNotEmpty>
+ 		</dynamic>
+		<dynamic prepend="AND">
+			<isNotEmpty property="search_sido">
+				MEM_ADD1 LIKE '%'||#search_sido#||' '||#search_gugun#||'%'
+			</isNotEmpty>
+		</dynamic>
+		<dynamic prepend="AND">
+			<isNotEmpty property="mem_hp1">
+				MEM_HP LIKE #mem_hp1#||'-%'
+			</isNotEmpty>
+		</dynamic>
+		<dynamic prepend="AND">
+			<isNotEmpty property="mem_hp2">
+				MEM_HP LIKE '%-'#mem_hp2#||'-%'
+			</isNotEmpty>
+		</dynamic>
+		<dynamic prepend="AND">
+			<isNotEmpty property="mem_hp3">
+				MEM_HP LIKE '%-'||#mem_hp3#
+			</isNotEmpty>
+		</dynamic>
+		<dynamic prepend="AND">
+			<isNotEmpty property="mem_bir">
+				TO_CHAR(MEM_BIR, 'yyyy-mm-dd') = #mem_bir#
+			</isNotEmpty>
+		</dynamic>
+	</sql>
+	
+	<select id="memberInfo" parameterClass="Map" resultClass="memberVO">
+		<include refid="selectAll"/>
+		   AND MEM_ID = #mem_id#
+			<isNotEmpty property="mem_pass">
+		   		AND  MEM_PASS = #mem_pass#
+			</isNotEmpty>		   
+	</select>
+	
+	<select id="memberList" parameterClass="Map" resultClass="memberVO">
+		<include refid="selectAll"/>
+		<include refid="searchCondition"/>		
+	</select>
+
+	<insert id="insertMember" parameterClass="memberVO">
+		INSERT INTO MEMBER
+		VALUES(
+				#mem_id#
+				,#mem_pass#
+				,#mem_name#
+				,#mem_regno1#
+				,#mem_regno2#
+				,to_date(#mem_bir#, 'yyyy/MM/dd hh24:mi:ss')
+				,#mem_zipcode#
+				,#mem_add1#
+				,#mem_add2#
+				,#mem_hometel#
+				,#mem_hometel#
+				,#mem_hp#
+				,#mem_mail#
+				,'n'
+			)
+	</insert>
+
+	<update id="updateMember" parameterClass="memberVO">
+		UPDATE MEMBER
+		   SET MEM_PASS=#mem_pass#,
+		   	   MEM_HOMETEL=#mem_hometel#,
+		   	   MEM_HP=#mem_hp#,
+		   	   MEM_MAIL=#mem_mail#,
+		   	   MEM_ZIPCODE=#mem_zipcode#,
+		   	   MEM_ADD1=#mem_add1#,
+		   	   MEM_ADD2=#mem_add2#
+	     WHERE MEM_ID =#mem_id#
+	</update>
+	
+	<update id="updateMemberForAdmin" parameterClass="memberVO">
+		UPDATE MEMBER
+		   SET MEM_PASS=#mem_pass#,
+		   	   MEM_HP=#mem_hp#,
+		   	   MEM_MAIL=#mem_mail#,
+		   	   MEM_ZIPCODE=#mem_zipcode#,
+		   	   MEM_ADD1=#mem_add1#,
+		   	   MEM_ADD2=#mem_add2#,
+		   	   MEM_BIR=TO_DATE(#mem_bir#,'yyyy-mm-dd')
+	     WHERE MEM_ID =#mem_id#
+	</update>
+	
+	<update id="deleteMember" parameterClass="Map">
+		UPDATE MEMBER
+           SET MEM_DEL = 'y'
+         WHERE MEM_ID = #mem_id#
+	</update>
+	
+	<select id="totalCount" parameterClass="map" resultClass="String">
+		SELECT COUNT(*)
+		  FROM MEMBER
+		 WHERE MEM_DEL = 'n' 
+		 <include refid="searchCondition"/>
+	</select>
+	
+	<select id="idCheck" parameterClass="Map" resultClass="int">
+		SELECT COUNT(*)
+		  FROM MEMBER
+		 WHERE MEM_ID = #mem_id#
+	</select>
+	
+	<select id="memberListForAdmin" parameterClass="Map" resultClass="memberVO">
+		<include refid="selectAll"/>
+		<include refid="searchConditionForAdmin"/>
+	</select>
+	
+</sqlMap>

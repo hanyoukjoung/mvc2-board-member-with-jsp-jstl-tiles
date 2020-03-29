@@ -1,0 +1,76 @@
+package kr.or.ddit.user.rboard.controller;
+
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.codehaus.jackson.JsonGenerationException;
+import org.codehaus.jackson.map.JsonMappingException;
+import org.codehaus.jackson.map.ObjectMapper;
+
+import kr.or.ddit.base.action.IAction;
+import kr.or.ddit.ref.board.service.REFBoardService;
+import kr.or.ddit.ref.board.service.REFBoardServiceImpl;
+import kr.or.ddit.utiles.RolePageingUtile;
+import kr.or.ddit.vo.RBoardVO;
+
+public class RboardListAction implements IAction {
+	private boolean isRedirect = false;
+	@Override
+	public boolean isRedirect() {
+		return isRedirect;
+	}
+
+	@Override
+	public String process(HttpServletRequest request,
+			HttpServletResponse response) {
+		try {
+			request.setCharacterEncoding("UTF-8");
+		} catch (UnsupportedEncodingException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
+		String currentPage = request.getParameter("currentPage");
+		if (currentPage == null) {
+			currentPage = "1";
+		}
+		try {
+			request.setCharacterEncoding("UTF-8");
+		} catch (UnsupportedEncodingException e) {
+
+			e.printStackTrace();
+		}
+		
+		String search_keyword = request.getParameter("search_keyword");
+		String search_keycode = request.getParameter("search_keycode");
+
+		Map<String, String> params = new HashMap<String, String>();
+		params.put("search_keyword", search_keyword);
+		params.put("search_keycode", search_keycode);
+
+		REFBoardService service = REFBoardServiceImpl.getInstance();
+		String totalCount = service.totalCount(params);
+
+		RolePageingUtile pagingUtil = new RolePageingUtile(request,Integer.parseInt(totalCount), Integer.parseInt(currentPage));
+
+		String startCount = String.valueOf(pagingUtil.getStartCount());
+		String endCount = String.valueOf(pagingUtil.getEndCount());
+
+		params.put("startCount", startCount);
+		params.put("endCount", endCount);
+
+		List<RBoardVO> rboardList = service.rboardList(params);
+		
+			
+		request.setAttribute("rboardList",rboardList);
+		request.setAttribute("paginationHtmls", pagingUtil.getPagingHtmls());
+		
+		return "/user/rboard/rboardList.tiles";
+	}
+}

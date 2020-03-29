@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap 
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="rboardfile">
+	<typeAlias alias="rFileVO" type="kr.or.ddit.vo.BoardFileVO" />
+	
+	<statement id="fileRList" resultClass="rFileVO">
+		SELECT *
+		  FROM RBOARD_FILE
+		 WHERE BO_NO=#bo_no#
+	</statement>
+	
+	<insert id="insertRFile" parameterClass="rFileVO">
+		<selectKey keyProperty="file_no">
+			SELECT RBOARD_FILE_SEQ.NEXTVAL FROM DUAL
+		</selectKey>
+		INSERT INTO RBOARD_FILE(FILE_NO
+							,BO_NO
+							,FILE_NAME
+							,FILE_SAVE_NAME
+							,FILE_CONT_TYPE
+							,FILE_SIZE
+							,FILE_DEL)
+							VALUES(#file_no#
+							,#bo_no#
+							,#file_name#
+							,#file_save_name#
+							,#file_cont_type#
+							,#file_size#
+							,'n')
+	</insert>
+	
+	<select id="fileRInfo" parameterClass="map" resultClass="rFileVO">
+		SELECT *
+		  FROM RBOARD_FILE
+		 WHERE FILE_NO = #file_no# 
+	</select>
+	
+</sqlMap>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+"http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<!-- 관리자 -->
+
+<sqlMap namespace="admin">
+	<typeAlias alias="adminVO" type="kr.or.ddit.vo.AdminVO"/>
+
+
+	<select id="adminInfo" parameterClass="Map" resultClass="adminVO">
+		SELECT *
+		  FROM ADMIN
+		 WHERE ADMIN_ID = #admin_id#
+	</select>
+</sqlMap>
